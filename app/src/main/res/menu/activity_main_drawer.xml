@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--        <item
+                android:id="@+id/nav_todos"
+                android:icon="@android:drawable/checkbox_off_background"
+                android:title="@string/todos" />
+
+            <item
+                android:id="@+id/nav_audifarma"
+                android:icon="@android:drawable/checkbox_off_background"
+                android:title="@string/audiofarma" />
+            <item
+                android:id="@+id/nav_rebaja"
+                android:icon="@android:drawable/checkbox_off_background"
+                android:title="@string/drogas_la_rebaja" />
+            <item
+                android:id="@+id/nav_farmatodo"
+                android:icon="@android:drawable/checkbox_off_background"
+                android:title="@string/farmatodo" />
+            <item
+                android:id="@+id/nav_multidrogas"
+                android:icon="@android:drawable/checkbox_off_background"
+                android:title="@string/multidrogas" />
+            <item
+                android:id="@+id/nav_farmasanitas"
+                android:icon="@android:drawable/checkbox_off_background"
+                android:title="@string/farmasanitas" />
+            <item
+                android:id="@+id/nav_copidrogas"
+                android:icon="@android:drawable/checkbox_off_background"
+                android:title="@string/copidrogas" />
+
+            <item
+                android:id="@+id/nav_colsubsidio"
+                android:icon="@android:drawable/checkbox_off_background"
+                android:title="@string/colsubsidio" />
+
+            <item
+                android:id="@+id/nav_locatel"
+                android:icon="@android:drawable/checkbox_off_background"
+                android:title="@string/locatel" />-->
+
+
+</menu>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="grunenthal" parent="@style/AppTheme">
+        <item name="android:itemTextAppearance">@style/myCustomMenuTextApearance</item>
+        <item name="android:fontFamily">universltstdboldcn</item>
+
+    </style>
+</resources>

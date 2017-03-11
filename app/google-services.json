@@ -1,0 +1,59 @@
+{
+  "project_info": {
+    "project_number": "765324053691",
+    "project_id": "flawless-span-121418"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:765324053691:android:b720634ec18312dc",
+        "android_client_info": {
+          "package_name": "com.leinaro.grunenthal"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "765324053691-9500bonarg25pi4h1ndb1a1a7auenhdf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.leinaro.grunenthal",
+            "certificate_hash": "CF8E55428FA2259C5D0FB1A90D3898A313A0FA7B"
+          }
+        },
+        {
+          "client_id": "765324053691-8o51ka4iov1200c5g958u66ihd7hm044.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.leinaro.grunenthal",
+            "certificate_hash": "CAE6870E8062374C6F2434DB046B77D65371FF9E"
+          }
+        },
+        {
+          "client_id": "765324053691-i31dhp9k093vu8im2690ar4dslnlb0e4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDO2R4K37gmVM5hCDogG2sJ_SYqPA2XzQg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 2,
+          "analytics_property": {
+            "tracking_id": "UA-86005508-1"
+          }
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

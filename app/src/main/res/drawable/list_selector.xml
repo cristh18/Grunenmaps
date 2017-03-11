@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:drawable="@color/background_menu" android:state_activated="false"/>
+    <item android:drawable="@color/colorPrimary" android:state_pressed="true"/>
+    <item android:drawable="@color/colorPrimary" android:state_activated="true"/>
+    <item
+        android:state_selected="true"
+        android:drawable="@color/colorPrimary"/>
+    <item
+        android:drawable="@color/background_menu" />
+    <item android:state_pressed="true" android:drawable="@color/colorPrimary"/>
+
+</selector>
