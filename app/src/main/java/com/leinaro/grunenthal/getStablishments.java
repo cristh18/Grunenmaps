@@ -1,26 +1,5 @@
 package com.leinaro.grunenthal;
 
-import android.os.AsyncTask;
-import android.util.Log;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.List;
-
-import javax.net.ssl.HttpsURLConnection;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -33,12 +12,12 @@ import static com.leinaro.grunenthal.GetStablishment.retrofit;
 public class getStablishments {
 
     public interface AsyncResponse {
-        void getStablishmentsComplete(List<Pharmacies> output);
+        void getStablishmentsComplete(ResponseGetAllPharmacies output);
     }
 
     public AsyncResponse asyncResponse = null;
 
-    public getStablishments(AsyncResponse delegate){
+    public getStablishments(AsyncResponse delegate) {
         this.asyncResponse = delegate;
     }
 
@@ -62,18 +41,18 @@ public class getStablishments {
     final void GetSomething() {
 
         GetStablishment gitHubService = retrofit.create(GetStablishment.class);
-        Call<List<Pharmacies>> call = gitHubService.getALlPharmacies();
+        Call<ResponseGetAllPharmacies> call = gitHubService.getALlPharmacies();
 //        List<Pharmacies> result = call.execute().body();
-        call.enqueue(new Callback<List<Pharmacies>>() {
+        call.enqueue(new Callback<ResponseGetAllPharmacies>() {
             @Override
-            public void onResponse(Call<List<Pharmacies>> call, Response<List<Pharmacies>> response) {
-                if (response.isSuccessful()){
+            public void onResponse(Call<ResponseGetAllPharmacies> call, Response<ResponseGetAllPharmacies> response) {
+                if (response.isSuccessful()) {
                     asyncResponse.getStablishmentsComplete(response.body());
                 }
             }
 
             @Override
-            public void onFailure(Call<List<Pharmacies>> call, Throwable t) {
+            public void onFailure(Call<ResponseGetAllPharmacies> call, Throwable t) {
 
             }
         });
