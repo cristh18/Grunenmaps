@@ -9,6 +9,7 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
@@ -24,7 +25,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-public class SplashScreenActivity extends AppCompatActivity implements getStablishments.AsyncResponse, GetTerms.AsyncResponse {
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+
+public class SplashScreenActivity extends AppCompatActivity implements /*getStablishments.AsyncResponse,*/ GetTerms.AsyncResponse {
 
     private boolean mVisible;
 
@@ -57,7 +62,7 @@ public class SplashScreenActivity extends AppCompatActivity implements getStabli
             GrnenthalApplication.franquicias.add(franquicia);
     }
 
-    @Override
+    //    @Override
     public void getStablishmentsComplete(ResponseGetAllPharmacies output) {
         try {
             if (output.result) {
@@ -89,44 +94,21 @@ public class SplashScreenActivity extends AppCompatActivity implements getStabli
 
     }
 
-    private void setPalexis(List pharmacies1) throws JSONException {
-//        for (int i = 0; i < pharmacies1.length(); i++) {
-//            Log.d("iarl", "name " + pharmacies1.getJSONObject(i).getString("name"));
-//
-//            addFranquicia(pharmacies1.getJSONObject(i).getString("franchise"));
-//            GrnenthalApplication.pharmacies1.add(
-//                    new Pharmacies(
-//                            pharmacies1.getJSONObject(i).getString("name"),
-//                            pharmacies1.getJSONObject(i).getString("address"),
-//                            pharmacies1.getJSONObject(i).getString("city"),
-//                            pharmacies1.getJSONObject(i).getDouble("lat"),
-//                            pharmacies1.getJSONObject(i).getDouble("lon"),
-//                            pharmacies1.getJSONObject(i).getString("idfranchise"),
-//                            pharmacies1.getJSONObject(i).getString("franchise"), "#92317c"
-//                    )
-//            );
-//        }
+    private void setPalexis(List<Pharmacies> pharmacies1) throws JSONException {
+        for (int i = 0; i < pharmacies1.size(); i++) {
+            Log.d("iarl", "name " + pharmacies1.get(i).getName());
+            addFranquicia(pharmacies1.get(i).getFranchise());
+        }
+
+        GrnenthalApplication.pharmacies1 = pharmacies1;
     }
 
-    private void setTranstec(List pharmacies2) throws JSONException {
-//        for (int i = 0; i < pharmacies2.length(); i++) {
-//            Log.d("iarl", "iarl transtec test test ::: " + i);
-//            Log.d("iarl", "iarl transtec test test ::: " + pharmacies2.getJSONObject(i).getString("franchise"));
-//            Log.d("iarl", "iarl transtec test test ::: " + pharmacies2.getJSONObject(i));
-//
-//            addFranquicia(pharmacies2.getJSONObject(i).getString("franchise"));
-//            GrnenthalApplication.pharmacies2.add(
-//                    new Pharmacies(
-//                            pharmacies2.getJSONObject(i).optString("name"),
-//                            pharmacies2.getJSONObject(i).optString("address"),
-//                            pharmacies2.getJSONObject(i).optString("city"),
-//                            pharmacies2.getJSONObject(i).getDouble("lat"),
-//                            pharmacies2.getJSONObject(i).getDouble("lon"),
-//                            pharmacies2.getJSONObject(i).optString("idfranchise"),
-//                            pharmacies2.getJSONObject(i).optString("franchise"), "#dc4338"
-//                    )
-//            );
-//        }
+    private void setTranstec(List<Pharmacies> pharmacies2) throws JSONException {
+        for (int i = 0; i < pharmacies2.size(); i++) {
+            Log.d("iarl", "name " + pharmacies2.get(i).getName());
+            addFranquicia(pharmacies2.get(i).getFranchise());
+            GrnenthalApplication.pharmacies2 = pharmacies2;
+        }
     }
 
     @Override
@@ -156,7 +138,7 @@ public class SplashScreenActivity extends AppCompatActivity implements getStabli
         boolean terminosYCondiciones = sharedpreferences.getBoolean("Acepto_Terminos_y_condiciones", false);
 
         if (terminosYCondiciones) {
-            new getStablishments(this).GetSomething();
+            requestAll();
         } else {
             TextView textview = (TextView) view.findViewById(R.id.textmsg);
             textview.setText(GrnenthalApplication.terms);
@@ -185,7 +167,25 @@ public class SplashScreenActivity extends AppCompatActivity implements getStabli
         editor.putBoolean("Acepto_Terminos_y_condiciones", true);
         editor.commit();
 
-        new getStablishments(this).GetSomething();
+        requestAll();
+    }
+
+    private void requestAll() {
+        Server server = new Server();
+        server.getStablishment().enqueue(new Callback<ResponseGetAllPharmacies>() {
+            @Override
+            public void onResponse(Call<ResponseGetAllPharmacies> call, Response<ResponseGetAllPharmacies> response) {
+                if (response.isSuccessful()) {
+                    getStablishmentsComplete(response.body());
+                }
+            }
+
+
+            @Override
+            public void onFailure(Call<ResponseGetAllPharmacies> call, Throwable t) {
+                Log.w("tagggg", "error");
+            }
+        });
     }
 
 }

@@ -1,10 +1,8 @@
 package com.leinaro.grunenthal;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -14,24 +12,20 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.SearchView;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.analytics.GoogleAnalytics;
@@ -40,7 +34,6 @@ import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.appindexing.Action;
 import com.google.android.gms.appindexing.AppIndex;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -144,18 +137,18 @@ public class MainActivity extends AppCompatActivity
                 Log.v("log_tag", "longitude" + longitude);
                 addresses = geocoder.getFromLocation(latitude,
                         longitude, 1);
-                if (addresses.size()>=1) {
+                if (addresses.size() >= 1) {
                     Log.v("log_tag", "addresses+)_+++" + addresses);
                     String cityName = addresses.get(0).getAddressLine(1);
-                    if (cityName == null){
-                     cityName = addresses.get(0).getFeatureName();
+                    if (cityName == null) {
+                        cityName = addresses.get(0).getFeatureName();
                     }
-                    if (cityName == null){
-                        cityName = "lat: "+latitude +" - lon: "+ longitude;
+                    if (cityName == null) {
+                        cityName = "lat: " + latitude + " - lon: " + longitude;
                     }
                     Log.v("log_tag", "CityName " + cityName);
 
-                    if (sharedPref.getBoolean("first_install",false)){
+                    if (sharedPref.getBoolean("first_install", false)) {
                         mTracker.send(new HitBuilders.EventBuilder()
                                 .setCategory("install")
                                 .setAction("install")
@@ -224,7 +217,7 @@ public class MainActivity extends AppCompatActivity
     private boolean hasPermission(String perm) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             return (PackageManager.PERMISSION_GRANTED == checkSelfPermission(perm));
-        }else
+        } else
             return true;
 
     }
@@ -266,17 +259,17 @@ public class MainActivity extends AppCompatActivity
                         Log.v("log_tag", "longitude" + longitude);
                         addresses = geocoder.getFromLocation(latitude,
                                 longitude, 1);
-                        if (addresses.size()>=1) {
+                        if (addresses.size() >= 1) {
                             Log.v("log_tag", "addresses+)_+++" + addresses);
                             String cityName = addresses.get(0).getAddressLine(1);
                             Log.v("log_tag", "CityName " + cityName);
-                            if (cityName == null){
+                            if (cityName == null) {
                                 cityName = addresses.get(0).getFeatureName();
                             }
-                            if (cityName == null){
-                                cityName = "lat: "+latitude +" - lon: "+ longitude;
+                            if (cityName == null) {
+                                cityName = "lat: " + latitude + " - lon: " + longitude;
                             }
-                            if (sharedPref.getBoolean("first_install",false)){
+                            if (sharedPref.getBoolean("first_install", false)) {
                                 mTracker.send(new HitBuilders.EventBuilder()
                                         .setCategory("install")
                                         .setAction("install")
@@ -303,11 +296,11 @@ public class MainActivity extends AppCompatActivity
                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(colombiaDefault, 12));
 
                         mMap.addMarker(new MarkerOptions()
-                                .position(colombiaDefault)
+                                        .position(colombiaDefault)
 //            .icon(getMarkerIcon(pharmacies.get(i).getColor()))
-                                .title("Estas aqui")
+                                        .title("Estas aqui")
 //            .snippet(pharmacies.get(i).getAddress())
-                );
+                        );
                         mMap.setMyLocationEnabled(true);
                         mMap.getUiSettings().setMyLocationButtonEnabled(true);
                     }
@@ -345,14 +338,14 @@ public class MainActivity extends AppCompatActivity
                 ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) ==
                         PackageManager.PERMISSION_GRANTED) {
 
-                    if (moreZoom) {
-            mMap.setMyLocationEnabled(true);
-            mMap.getUiSettings().setMyLocationButtonEnabled(true);
-        } else {
-            mMap.setMyLocationEnabled(true);
-            mMap.getUiSettings().setMyLocationButtonEnabled(true);
-            mMap.getUiSettings().setCompassEnabled(true);
-        }
+            if (moreZoom) {
+                mMap.setMyLocationEnabled(true);
+                mMap.getUiSettings().setMyLocationButtonEnabled(true);
+            } else {
+                mMap.setMyLocationEnabled(true);
+                mMap.getUiSettings().setMyLocationButtonEnabled(true);
+                mMap.getUiSettings().setCompassEnabled(true);
+            }
 
         } else {
             Toast.makeText(this, "No tienes permisos", Toast.LENGTH_LONG).show();
@@ -361,14 +354,18 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void addMarkerFinal(Pharmacies pharmacies) {
-        mMap.addMarker(new MarkerOptions()
-                .position(
-                        new LatLng(
-                                pharmacies.getLat(),
-                                pharmacies.getLon()))
-                .icon(getMarkerIcon(pharmacies.getColor()))
-                .title(pharmacies.getName())
-                .snippet(pharmacies.getAddress()));
+        try {
+            mMap.addMarker(new MarkerOptions()
+                    .position(
+                            new LatLng(
+                                    pharmacies.getLat(),
+                                    pharmacies.getLon()))
+                    .icon(getMarkerIcon(pharmacies.getColor()))
+                    .title(pharmacies.getName())
+                    .snippet(pharmacies.getAddress()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
