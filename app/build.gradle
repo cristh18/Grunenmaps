@@ -10,8 +10,8 @@ android {
         applicationId "com.leinaro.grunenthal"
         minSdkVersion 19
         targetSdkVersion 23
-        versionCode 4
-        versionName "2.3"
+        versionCode 6
+        versionName "2.6"
         multiDexEnabled true
     }
     buildTypes {
@@ -20,6 +20,13 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+
+
+        dexOptions {
+            javaMaxHeapSize "2048M"
+        }
+
 }
 
 dependencies {
