@@ -10,7 +10,6 @@ public class Server {
 
     private final ServerRequests request;
 
-
     public interface ServerRequests {
         @GET("all")
         Call<ResponseGetAllPharmacies> getALlPharmacies();

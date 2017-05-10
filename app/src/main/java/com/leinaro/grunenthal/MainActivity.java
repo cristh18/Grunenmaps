@@ -50,6 +50,16 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity
         implements AdapterView.OnItemClickListener, OnMapReadyCallback, View.OnClickListener {
 
+
+    private static final String[] INITIAL_PERMS = {
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.READ_CONTACTS
+    };
+
+    private ImageButton palexis;
+    private ImageButton transtec;
+    private ListView listDrawer;
+
     private GoogleMap mMap;
     //    private Location location;
     private LocationManager locationManager;
@@ -60,25 +70,21 @@ public class MainActivity extends AppCompatActivity
     private String filter = "";
 
 
-    private ImageButton palexis;
-    private ImageButton transtec;
-
-    private static final String[] INITIAL_PERMS = {
-            Manifest.permission.ACCESS_FINE_LOCATION,
-            Manifest.permission.READ_CONTACTS
-    };
-
     private GoogleApiClient client;
     private GPSTracker gps;
     private SharedPreferences sharedPref;
     private SharedPreferences.Editor editor;
 
+    private Geocoder geocoder;
+
+    private LatLng colombiaDefault;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        initializeView();
 
         if (!canAccessLocation() || !canAccessContacts()) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -89,33 +95,17 @@ public class MainActivity extends AppCompatActivity
         sharedPref = getPreferences(Context.MODE_PRIVATE);
         editor = sharedPref.edit();
 
-        palexis = (ImageButton) findViewById(R.id.palexis);
-        transtec = (ImageButton) findViewById(R.id.transtec);
         moreZoom = false;
-        transtec.setOnClickListener(this);
-        palexis.setOnClickListener(this);
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
 
         mTracker = getDefaultTracker();
 
-
         AdapterDrawerMenu customAdapter = new AdapterDrawerMenu(GrnenthalApplication.franquicias, this);
 
-        ListView listDrawer = (ListView) findViewById(R.id.lst_menu_items);
         listDrawer.setAdapter(customAdapter);
         listDrawer.setSelector(R.drawable.list_selector);
-
         listDrawer.setOnItemClickListener(this);
 
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-
-        // Acquire a reference to the system Location Manager
+            // Acquire a reference to the system Location Manager
         locationManager = (LocationManager) this.getSystemService(this.LOCATION_SERVICE);
 
         isPalexis = false;
@@ -124,57 +114,16 @@ public class MainActivity extends AppCompatActivity
 
         // check if GPS enabled
         if (gps.canGetLocation()) {
-
             double latitude = gps.getLatitude();
             double longitude = gps.getLongitude();
-
-            Geocoder geocoder = new Geocoder(
-                    this, Locale
-                    .getDefault());
-            List<Address> addresses;
-            try {
-                Log.v("log_tag", "latitude" + latitude);
-                Log.v("log_tag", "longitude" + longitude);
-                addresses = geocoder.getFromLocation(latitude,
-                        longitude, 1);
-                if (addresses.size() >= 1) {
-                    Log.v("log_tag", "addresses+)_+++" + addresses);
-                    String cityName = addresses.get(0).getAddressLine(1);
-                    if (cityName == null) {
-                        cityName = addresses.get(0).getFeatureName();
-                    }
-                    if (cityName == null) {
-                        cityName = "lat: " + latitude + " - lon: " + longitude;
-                    }
-                    Log.v("log_tag", "CityName " + cityName);
-
-                    if (sharedPref.getBoolean("first_install", false)) {
-                        mTracker.send(new HitBuilders.EventBuilder()
-                                .setCategory("install")
-                                .setAction("install")
-                                .setLabel(cityName)
-                                .build());
-
-                        editor.putBoolean("first_install", true);
-                        editor.commit();
-                    }
-
-                    mTracker.send(new HitBuilders.EventBuilder()
-                            .setCategory("city")
-                            .setAction("open")
-                            .setLabel(cityName)
-                            .build());
-                }
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-
-
             colombiaDefault = new LatLng(latitude, longitude);
+
+            geocoder = new Geocoder(this, Locale.getDefault());
+
+            sendAnalitycs(latitude, longitude);
+
             if (mMap != null) {
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(colombiaDefault, 12));
-
                 mMap.setMyLocationEnabled(true);
                 mMap.getUiSettings().setMyLocationButtonEnabled(true);
             }
@@ -184,11 +133,68 @@ public class MainActivity extends AppCompatActivity
             colombiaDefault = new LatLng(4.689019, -74.090721);
             gps.showSettingsAlert();
         }
-        // ATTENTION: This was auto-generated to implement the App Indexing API.
-        // See https://g.co/AppIndexing/AndroidStudio for more information.
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+    }
 
-        // Obtain the shared Tracker instance.
+    private void sendAnalitycs(double latitude,double longitude) {
+        List<Address> addresses;
+        try {
+            Log.v("log_tag", "latitude" + latitude);
+            Log.v("log_tag", "longitude" + longitude);
+            addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            if (addresses.size() >= 1) {
+                Log.v("log_tag", "addresses+)_+++" + addresses);
+                String cityName = addresses.get(0).getAddressLine(1);
+                if (cityName == null) {
+                    cityName = addresses.get(0).getFeatureName();
+                }
+                if (cityName == null) {
+                    cityName = "lat: " + latitude + " - lon: " + longitude;
+                }
+                Log.v("log_tag", "CityName " + cityName);
+
+                if (sharedPref.getBoolean("first_install", false)) {
+                    mTracker.send(new HitBuilders.EventBuilder()
+                            .setCategory("install")
+                            .setAction("install")
+                            .setLabel(cityName)
+                            .build());
+
+                    editor.putBoolean("first_install", true);
+                    editor.commit();
+                }
+
+                mTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory("city")
+                        .setAction("open")
+                        .setLabel(cityName)
+                        .build());
+            }
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    private void initializeView() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        palexis = (ImageButton) findViewById(R.id.palexis);
+        transtec = (ImageButton) findViewById(R.id.transtec);
+        transtec.setOnClickListener(this);
+        palexis.setOnClickListener(this);
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
+
+        listDrawer = (ListView) findViewById(R.id.lst_menu_items);
+
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
     }
 
     private Tracker mTracker;
@@ -200,7 +206,6 @@ public class MainActivity extends AppCompatActivity
     synchronized public Tracker getDefaultTracker() {
         if (mTracker == null) {
             GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
-            // To enable debug logging use: adb shell setprop log.tag.GAv4 DEBUG
             mTracker = analytics.newTracker(R.xml.global_tracker);
         }
         return mTracker;
@@ -222,7 +227,6 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -235,88 +239,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
-                PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) ==
-                        PackageManager.PERMISSION_GRANTED) {
-
-
-            if (moreZoom) {
-                mMap.setMyLocationEnabled(true);
-                mMap.getUiSettings().setMyLocationButtonEnabled(true);
-
-                if (gps.canGetLocation()) {
-
-                    double latitude = gps.getLatitude();
-                    double longitude = gps.getLongitude();
-
-                    Geocoder geocoder = new Geocoder(
-                            this, Locale
-                            .getDefault());
-                    List<Address> addresses;
-                    try {
-                        Log.v("log_tag", "latitude" + latitude);
-                        Log.v("log_tag", "longitude" + longitude);
-                        addresses = geocoder.getFromLocation(latitude,
-                                longitude, 1);
-                        if (addresses.size() >= 1) {
-                            Log.v("log_tag", "addresses+)_+++" + addresses);
-                            String cityName = addresses.get(0).getAddressLine(1);
-                            Log.v("log_tag", "CityName " + cityName);
-                            if (cityName == null) {
-                                cityName = addresses.get(0).getFeatureName();
-                            }
-                            if (cityName == null) {
-                                cityName = "lat: " + latitude + " - lon: " + longitude;
-                            }
-                            if (sharedPref.getBoolean("first_install", false)) {
-                                mTracker.send(new HitBuilders.EventBuilder()
-                                        .setCategory("install")
-                                        .setAction("install")
-                                        .setLabel(cityName)
-                                        .build());
-
-                                editor.putBoolean("first_install", true);
-                                editor.commit();
-                            }
-
-                            mTracker.send(new HitBuilders.EventBuilder()
-                                    .setCategory("city")
-                                    .setAction("open")
-                                    .setLabel(cityName)
-                                    .build());
-                        }
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-
-                    colombiaDefault = new LatLng(latitude, longitude);
-                    if (mMap != null) {
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(colombiaDefault, 12));
-
-                        mMap.addMarker(new MarkerOptions()
-                                        .position(colombiaDefault)
-//            .icon(getMarkerIcon(pharmacies.get(i).getColor()))
-                                        .title("Estas aqui")
-//            .snippet(pharmacies.get(i).getAddress())
-                        );
-                        mMap.setMyLocationEnabled(true);
-                        mMap.getUiSettings().setMyLocationButtonEnabled(true);
-                    }
-                    moreZoom = true;
-
-                }
-            } else {
-                mMap.setMyLocationEnabled(true);
-                mMap.getUiSettings().setMyLocationButtonEnabled(true);
-                mMap.getUiSettings().setCompassEnabled(true);
-            }
-
-        } else {
-            Toast.makeText(this, "No tienes permisos", Toast.LENGTH_LONG).show();
-        }
-
+        zoomLocation();
     }
 
     public BitmapDescriptor getMarkerIcon(String color) {
@@ -325,44 +248,65 @@ public class MainActivity extends AppCompatActivity
         return BitmapDescriptorFactory.defaultMarker(hsv[0]);
     }
 
-    private LatLng colombiaDefault;
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
         addMarkers("", GrnenthalApplication.pharmacies2, "");
+        zoomLocation();
+    }
 
+    private void zoomLocation() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
                 PackageManager.PERMISSION_GRANTED &&
                 ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) ==
                         PackageManager.PERMISSION_GRANTED) {
-
-            if (moreZoom) {
+            if (!moreZoom) {
                 mMap.setMyLocationEnabled(true);
                 mMap.getUiSettings().setMyLocationButtonEnabled(true);
             } else {
                 mMap.setMyLocationEnabled(true);
                 mMap.getUiSettings().setMyLocationButtonEnabled(true);
                 mMap.getUiSettings().setCompassEnabled(true);
+
+                if (gps.canGetLocation()) {
+
+                    double latitude = gps.getLatitude();
+                    double longitude = gps.getLongitude();
+                    colombiaDefault = new LatLng(latitude, longitude);
+
+                    sendAnalitycs(latitude,longitude);
+
+                    if (mMap != null) {
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(colombiaDefault, 12));
+                        mMap.addMarker(new MarkerOptions().position(colombiaDefault)
+//            .icon(getMarkerIcon(pharmacies.get(i).getColor()))
+                                        .title("Estas aqui")
+//            .snippet(pharmacies.get(i).getAddress())
+                        );
+                        mMap.setMyLocationEnabled(true);
+                        mMap.getUiSettings().setMyLocationButtonEnabled(true);
+                    }
+                    moreZoom = true;
+                }
             }
 
         } else {
             Toast.makeText(this, "No tienes permisos", Toast.LENGTH_LONG).show();
         }
-
     }
+
 
     private void addMarkerFinal(Pharmacies pharmacies) {
         try {
             mMap.addMarker(new MarkerOptions()
                     .position(
                             new LatLng(
-                                    pharmacies.getLat(),
-                                    pharmacies.getLon()))
-                    .icon(getMarkerIcon(pharmacies.getColor()))
-                    .title(pharmacies.getName())
-                    .snippet(pharmacies.getAddress()));
+                                    Double.parseDouble(pharmacies.lat),
+                                    Double.parseDouble(pharmacies.lon)))
+                    .icon(getMarkerIcon(pharmacies.color))
+                    .title(pharmacies.name)
+                    .snippet(pharmacies.address));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -382,24 +326,24 @@ public class MainActivity extends AppCompatActivity
             filterOnlyProduct(pharmacies);
         } else if (!filterf.isEmpty() && filterAll.isEmpty()) {
             for (int i = 0; i < pharmacies.size(); i++) {
-                if (filterf.compareToIgnoreCase(pharmacies.get(i).getFranchise()) == 0) {
+                if (filterf.compareToIgnoreCase(pharmacies.get(i).franchise) == 0) {
                     addMarkerFinal(pharmacies.get(i));
                 }
             }
         } else if (filterf.isEmpty() && !filterAll.isEmpty()) {
             for (int i = 0; i < pharmacies.size(); i++) {
-                if (pharmacies.get(i).getName().toUpperCase().contains(filterAll.toUpperCase())
-                        || pharmacies.get(i).getFranchise().toUpperCase().contains(filterAll.toUpperCase())
-                        || pharmacies.get(i).getAddress().toUpperCase().contains(filterAll.toUpperCase())) {
+                if (pharmacies.get(i).name.toUpperCase().contains(filterAll.toUpperCase())
+                        || pharmacies.get(i).franchise.toUpperCase().contains(filterAll.toUpperCase())
+                        || pharmacies.get(i).address.toUpperCase().contains(filterAll.toUpperCase())) {
                     addMarkerFinal(pharmacies.get(i));
                 }
             }
         } else if (!filterf.isEmpty() && !filterAll.isEmpty()) {
             for (int i = 0; i < pharmacies.size(); i++) {
-                if (filterf.compareToIgnoreCase(pharmacies.get(i).getFranchise()) == 0) {
-                    if (pharmacies.get(i).getName().toUpperCase().contains(filterAll.toUpperCase())
-                            || pharmacies.get(i).getFranchise().toUpperCase().contains(filterAll.toUpperCase())
-                            || pharmacies.get(i).getAddress().toUpperCase().contains(filterAll.toUpperCase())) {
+                if (filterf.compareToIgnoreCase(pharmacies.get(i).franchise) == 0) {
+                    if (pharmacies.get(i).name.toUpperCase().contains(filterAll.toUpperCase())
+                            || pharmacies.get(i).franchise.toUpperCase().contains(filterAll.toUpperCase())
+                            || pharmacies.get(i).address.toUpperCase().contains(filterAll.toUpperCase())) {
                         addMarkerFinal(pharmacies.get(i));
                     }
                 }
