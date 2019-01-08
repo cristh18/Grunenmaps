@@ -12,6 +12,9 @@ import java.util.List;
  */
 public class GrnenthalApplication extends Application{
 
+    private static GrnenthalApplication sInstance;
+
+
     public static List<String> franquicias;
     public static List<Pharmacies> pharmacies1;
     public static List<Pharmacies> pharmacies2;
@@ -20,9 +23,14 @@ public class GrnenthalApplication extends Application{
     @Override
     public void onCreate() {
         super.onCreate();
+        sInstance = this;
         pharmacies1 = new ArrayList<Pharmacies>();
         pharmacies2 = new ArrayList<Pharmacies>();
         franquicias = new ArrayList<String>();
+    }
+
+    public static GrnenthalApplication get() {
+        return sInstance;
     }
 
     @Override

@@ -26,4 +26,7 @@
     <string name="title_activity_maps">Map</string>
     <string name="terms_title">Términos y Condiciones</string>
     <string name="dialog_terms_ok">Aceptar</string>
+    <string name="copy_error_getting_pharmacies">No se pudo obtener farmacias</string>
+    <string name="copy_error_getting_terms">No se pudo obtener términos y condiciones</string>
+    <string name="copy_permission_location_rationale">El permiso de ubicacion es necesario para mostrar la ubicacion de las farmacias</string>
 </resources>

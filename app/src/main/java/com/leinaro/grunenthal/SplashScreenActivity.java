@@ -15,8 +15,12 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.leinaro.grunenthal.api.client.ApiClientKt;
+import com.leinaro.grunenthal.api.models.TermsResponse;
+import com.leinaro.grunenthal.api.services.PharmacyService;
+import com.leinaro.grunenthal.api.services.TermsService;
+
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.text.Collator;
 import java.text.ParseException;
@@ -25,14 +29,16 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.schedulers.Schedulers;
 
-public class SplashScreenActivity extends AppCompatActivity implements GetTerms.AsyncResponse {
+public class SplashScreenActivity extends AppCompatActivity {
 
     private boolean mVisible;
     private SharedPreferences sharedpreferences;
+
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,32 +46,36 @@ public class SplashScreenActivity extends AppCompatActivity implements GetTerms.
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         hide();
         setContentView(R.layout.activity_splash_screen);
-        new GetTerms(this).execute();
+        getTerms();
         mVisible = true;
+    }
+
+    private void getTerms() {
+        TermsService termsService = ApiClientKt.getRemoteClient(getBaseContext()).create(TermsService.class);
+        compositeDisposable.add(termsService.getTerms()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::notifyTerms, t -> showServiceError(t, getString(R.string.copy_error_getting_terms))));
+    }
+
+    private void notifyTerms(TermsResponse termsResponse) {
+        if (termsResponse.getResult()) {
+            GrnenthalApplication.terms = termsResponse.getData();
+            showTerms();
+        } else {
+            Toast.makeText(this, getString(R.string.copy_error_getting_terms), Toast.LENGTH_LONG).show();
+        }
+    }
+
+    private void showServiceError(Throwable throwable, String errorMessage) {
+        throwable.printStackTrace();
+        Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show();
     }
 
     private void hide() {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.hide();
-        }
-    }
-
-    @Override
-    public void getTermsComplete(JSONObject output) {
-        try {
-            Log.d("iarl", "getTermsComplete" );
-            boolean success = output.optBoolean("result", false);
-            Log.d("iarl", "getTermsComplete  "+ success);
-
-            if (success) {
-                GrnenthalApplication.terms = output.optString("data");
-                showTerms();
-            } else {
-                Toast.makeText(this, "No se pudo obtener términos y condiciones", Toast.LENGTH_LONG).show();
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
@@ -86,7 +96,7 @@ public class SplashScreenActivity extends AppCompatActivity implements GetTerms.
 
         boolean terminosYCondiciones = sharedpreferences.getBoolean("Acepto_Terminos_y_condiciones", false);
 
-        Log.d("iarl", "showTerms "+terminosYCondiciones);
+        Log.d("iarl", "showTerms " + terminosYCondiciones);
 
         if (terminosYCondiciones) {
             requestAll();
@@ -111,26 +121,15 @@ public class SplashScreenActivity extends AppCompatActivity implements GetTerms.
 
     private void requestAll() {
         Log.d("iarl", "requestAll");
-
-        Server server = new Server();
-        server.getStablishment().enqueue(new Callback<ResponseGetAllPharmacies>() {
-            @Override
-            public void onResponse(Call<ResponseGetAllPharmacies> call, Response<ResponseGetAllPharmacies> response) {
-                Log.d("iarl", "get stablshment success");
-                if (response.isSuccessful()) {
-                    getStablishmentsComplete(response.body());
-                }
-            }
-            @Override
-            public void onFailure(Call<ResponseGetAllPharmacies> call, Throwable t) {
-                Log.e("iarl", "error to get stablishment");
-                Toast.makeText(getApplicationContext(), "No se pudo obtener los establecimientos", Toast.LENGTH_LONG).show();
-            }
-        });
+        PharmacyService pharmacyService = ApiClientKt.getRemoteClient(getBaseContext()).create(PharmacyService.class);
+        compositeDisposable.add(pharmacyService.getAllPharmacies()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(this::getStablishmentsComplete, t -> showServiceError(t, getString(R.string.copy_error_getting_pharmacies))));
     }
 
     public void getStablishmentsComplete(ResponseGetAllPharmacies output) {
-        Log.d("iarl", "getStablishmentsComplete " );
+        Log.d("iarl", "getStablishmentsComplete ");
 
         try {
             if (output.result) {
@@ -139,7 +138,7 @@ public class SplashScreenActivity extends AppCompatActivity implements GetTerms.
                 sortFranquise();
                 GrnenthalApplication.franquicias.add(0, "Todos");
             } else {
-                Toast.makeText(this, "No se pudo obtener farmacias", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, getString(R.string.copy_error_getting_pharmacies), Toast.LENGTH_LONG).show();
             }
 
             Intent mainIntent = new Intent().setClass(SplashScreenActivity.this, MainActivity.class);

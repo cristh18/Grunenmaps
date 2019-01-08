@@ -3,6 +3,8 @@ package com.leinaro.grunenthal;
 import android.Manifest;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -12,13 +14,16 @@ import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.v4.content.ContextCompat;
+import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -47,6 +52,14 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 
+import permissions.dispatcher.NeedsPermission;
+import permissions.dispatcher.OnNeverAskAgain;
+import permissions.dispatcher.OnPermissionDenied;
+import permissions.dispatcher.OnShowRationale;
+import permissions.dispatcher.PermissionRequest;
+import permissions.dispatcher.RuntimePermissions;
+
+@RuntimePermissions
 public class MainActivity extends AppCompatActivity
         implements AdapterView.OnItemClickListener, OnMapReadyCallback, View.OnClickListener {
 
@@ -79,18 +92,18 @@ public class MainActivity extends AppCompatActivity
 
     private LatLng colombiaDefault;
 
+    protected AlertDialog dialog;
 
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initializeView();
 
-        if (!canAccessLocation() || !canAccessContacts()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(INITIAL_PERMS, INITIAL_REQUEST);
-            }
-        }
+//        if (!canAccessLocation() || !canAccessContacts()) {
+//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                requestPermissions(INITIAL_PERMS, INITIAL_REQUEST);
+//            }
+//        }
 
         sharedPref = getPreferences(Context.MODE_PRIVATE);
         editor = sharedPref.edit();
@@ -105,11 +118,16 @@ public class MainActivity extends AppCompatActivity
         listDrawer.setSelector(R.drawable.list_selector);
         listDrawer.setOnItemClickListener(this);
 
-            // Acquire a reference to the system Location Manager
+        // Acquire a reference to the system Location Manager
         locationManager = (LocationManager) this.getSystemService(this.LOCATION_SERVICE);
 
         isPalexis = false;
 
+        successLocationAndPhoneStatePermission(); // TODO CHANGE METHOD NAME
+
+    }
+
+    protected void successLocationAndPhoneStatePermission() {
         gps = new GPSTracker(MainActivity.this);
 
         // check if GPS enabled
@@ -120,23 +138,71 @@ public class MainActivity extends AppCompatActivity
 
             geocoder = new Geocoder(this, Locale.getDefault());
 
-            sendAnalitycs(latitude, longitude);
-
-            if (mMap != null) {
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(colombiaDefault, 12));
-                mMap.setMyLocationEnabled(true);
-                mMap.getUiSettings().setMyLocationButtonEnabled(true);
-            }
-            moreZoom = true;
+//            sendAnalitycs(latitude, longitude);
 
         } else {
             colombiaDefault = new LatLng(4.689019, -74.090721);
             gps.showSettingsAlert();
         }
         client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+
+        connectGoogleClient();
+
+//        zoomLocation();
     }
 
-    private void sendAnalitycs(double latitude,double longitude) {
+    @OnShowRationale({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
+    void showRationaleForCamera(PermissionRequest request) {
+        // NOTE: Show a rationale to explain why the permission is needed, e.g. with a dialog.
+        // Call proceed() or cancel() on the provided PermissionRequest to continue or abort
+        showRationaleDialog(R.string.copy_permission_location_rationale, request);
+    }
+
+    @OnPermissionDenied({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
+    protected void LocationAndPhoneStatePermissionDenied() {
+        Toast.makeText(this, "Permissions denied", Toast.LENGTH_SHORT).show();
+        MainActivityPermissionsDispatcher.zoomLocationWithPermissionCheck(this);
+    }
+
+    @OnNeverAskAgain({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
+    public void locationPermissionOnNeverAskAgain() {
+        showDialogDeniedPermission("ubicación");
+    }
+
+    private void showRationaleDialog(@StringRes int messageResId, final PermissionRequest request) {
+        new AlertDialog.Builder(this)
+                .setPositiveButton("Permitir", (dialog, which) -> request.proceed())
+                .setNegativeButton("Denegar", (dialog, which) -> request.cancel())
+                .setCancelable(false)
+                .setMessage(messageResId)
+                .show();
+    }
+
+    private void showDialogDeniedPermission(String permissionDenied) {
+        AlertDialog.Builder builder = getDialogDeniedPermission("Has denegado el permiso de ".concat(permissionDenied).concat("tienes que habilitarlo de manera manual para poder continuar."))
+                .setPositiveButton("Habilitar", (dialog, which) -> handleDialogPermission(dialog));
+        dialog = builder.create();
+        dialog.show();
+    }
+
+    private AlertDialog.Builder getDialogDeniedPermission(String message) {
+        return new AlertDialog.Builder(this)
+                .setTitle("Permiso denegado")
+                .setMessage(message)
+                .setCancelable(false);
+    }
+
+    private void handleDialogPermission(DialogInterface dialog) {
+        dialog.dismiss();
+        startSettings();
+    }
+
+    protected void startSettings() {
+        startActivity(new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                Uri.parse("package:".concat(GrnenthalApplication.get().getPackageName()))));
+    }
+
+    private void sendAnalitycs(double latitude, double longitude) {
         List<Address> addresses;
         try {
             Log.v("log_tag", "latitude" + latitude);
@@ -201,6 +267,7 @@ public class MainActivity extends AppCompatActivity
 
     /**
      * Gets the default {@link Tracker} for this {@link Application}.
+     *
      * @return tracker
      */
     synchronized public Tracker getDefaultTracker() {
@@ -237,9 +304,15 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+//        zoomLocation();
+//    }
+
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        zoomLocation();
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        MainActivityPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
     }
 
     public BitmapDescriptor getMarkerIcon(String color) {
@@ -253,52 +326,58 @@ public class MainActivity extends AppCompatActivity
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         addMarkers("", GrnenthalApplication.pharmacies2, "");
-        zoomLocation();
+
+        MainActivityPermissionsDispatcher.zoomLocationWithPermissionCheck(this);
+
+//        zoomLocation();
     }
 
-    private void zoomLocation() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
-                PackageManager.PERMISSION_GRANTED &&
-                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) ==
-                        PackageManager.PERMISSION_GRANTED) {
-            if (!moreZoom) {
-                mMap.setMyLocationEnabled(true);
-                mMap.getUiSettings().setMyLocationButtonEnabled(true);
-            } else {
-                mMap.setMyLocationEnabled(true);
-                mMap.getUiSettings().setMyLocationButtonEnabled(true);
-                mMap.getUiSettings().setCompassEnabled(true);
+    @NeedsPermission({Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION})
+    void zoomLocation() {
+//        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
+//                PackageManager.PERMISSION_GRANTED &&
+//                ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) ==
+//                        PackageManager.PERMISSION_GRANTED) {
 
-                if (gps.canGetLocation()) {
 
-                    double latitude = gps.getLatitude();
-                    double longitude = gps.getLongitude();
-                    colombiaDefault = new LatLng(latitude, longitude);
+        if (mMap != null) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(colombiaDefault, 12));
+            mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setMyLocationButtonEnabled(true);
 
-                    sendAnalitycs(latitude,longitude);
+            if (gps.canGetLocation()) {
+                double latitude = gps.getLatitude();
+                double longitude = gps.getLongitude();
+                colombiaDefault = new LatLng(latitude, longitude);
 
-                    if (mMap != null) {
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(colombiaDefault, 12));
-                        mMap.addMarker(new MarkerOptions().position(colombiaDefault)
+//                sendAnalitycs(latitude, longitude);
+
+                if (mMap != null) {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(colombiaDefault, 12));
+                    mMap.addMarker(new MarkerOptions().position(colombiaDefault)
 //            .icon(getMarkerIcon(pharmacies.get(i).getColor()))
-                                        .title("Estas aqui")
+                                    .title("Estas aqui")
 //            .snippet(pharmacies.get(i).getAddress())
-                        );
-                        mMap.setMyLocationEnabled(true);
-                        mMap.getUiSettings().setMyLocationButtonEnabled(true);
-                    }
-                    moreZoom = true;
+                    );
+                    mMap.setMyLocationEnabled(true);
+                    mMap.getUiSettings().setMyLocationButtonEnabled(true);
                 }
+                moreZoom = true;
             }
-
-        } else {
-            Toast.makeText(this, "No tienes permisos", Toast.LENGTH_LONG).show();
         }
+
+
+//        } else {
+//            Toast.makeText(this, "No tienes permisos", Toast.LENGTH_LONG).show();
+//        }
     }
 
 
     private void addMarkerFinal(Pharmacies pharmacies) {
-        try {
+        if (pharmacies.lat != null
+                && pharmacies.lon != null
+                && !TextUtils.isEmpty(pharmacies.lat)
+                && !TextUtils.isEmpty(pharmacies.lon)) {
             mMap.addMarker(new MarkerOptions()
                     .position(
                             new LatLng(
@@ -307,10 +386,7 @@ public class MainActivity extends AppCompatActivity
                     .icon(getMarkerIcon(pharmacies.color))
                     .title(pharmacies.name)
                     .snippet(pharmacies.address));
-        } catch (Exception e) {
-            e.printStackTrace();
         }
-
     }
 
     private void filterOnlyProduct(List<Pharmacies> pharmacies) {
@@ -442,6 +518,11 @@ public class MainActivity extends AppCompatActivity
     public void onStart() {
         super.onStart();
 
+//        connectGoogleClient();
+//        AppIndex.AppIndexApi.start(client, viewAction);
+    }
+
+    private void connectGoogleClient() {
         client.connect();
         Action viewAction = Action.newAction(
                 Action.TYPE_VIEW,
@@ -449,7 +530,6 @@ public class MainActivity extends AppCompatActivity
                 Uri.parse("http://host/path"),
                 Uri.parse("android-app://com.leinaro.grunenthal/http/host/path")
         );
-//        AppIndex.AppIndexApi.start(client, viewAction);
     }
 
     @Override
