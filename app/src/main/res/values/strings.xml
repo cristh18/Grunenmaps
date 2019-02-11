@@ -29,4 +29,9 @@
     <string name="copy_error_getting_pharmacies">No se pudo obtener farmacias</string>
     <string name="copy_error_getting_terms">No se pudo obtener términos y condiciones</string>
     <string name="copy_permission_location_rationale">El permiso de ubicacion es necesario para mostrar la ubicacion de las farmacias</string>
+    <string name="custom_search">Personalizar búsqueda</string>
+    <string name="select_search_criteria">Selecciona tus criterios de búsqueda</string>
+    <string name="pharmacy_chain">Cadena de drogería:</string>
+    <string name="terms_and_conditions">Términos y condiciones</string>
+    <string name="marker_format">%1$s\n%2$s\n%3$s</string>
 </resources>

@@ -4,6 +4,9 @@ import android.app.Application;
 import android.content.Context;
 import android.support.multidex.MultiDex;
 
+import com.leinaro.grunenthal.api.models.Pharmacies;
+import com.leinaro.grunenthal.api.models.Pharmacy;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,17 +19,19 @@ public class GrnenthalApplication extends Application{
 
 
     public static List<String> franquicias;
-    public static List<Pharmacies> pharmacies1;
-    public static List<Pharmacies> pharmacies2;
+    public static List<Pharmacy> pharmacies1;
+    public static List<Pharmacy> pharmacies2;
+    public static List<Pharmacy> pharmacies3;
     public static String terms;
 
     @Override
     public void onCreate() {
         super.onCreate();
         sInstance = this;
-        pharmacies1 = new ArrayList<Pharmacies>();
-        pharmacies2 = new ArrayList<Pharmacies>();
-        franquicias = new ArrayList<String>();
+        pharmacies1 = new ArrayList<>();
+        pharmacies2 = new ArrayList<>();
+        pharmacies3 = new ArrayList<>();
+        franquicias = new ArrayList<>();
     }
 
     public static GrnenthalApplication get() {
