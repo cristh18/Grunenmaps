@@ -5,12 +5,12 @@ import android.graphics.Color
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.Toolbar
+import android.util.Log
 import android.view.MenuItem
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.CompoundButton
-import android.widget.Toast
 import com.leinaro.grunenthal.GrnenthalApplication
 import com.leinaro.grunenthal.R
 import com.leinaro.grunenthal.models.SearchParameters
@@ -28,8 +28,14 @@ class CustomSearchActivity : AppCompatActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_custom_search)
+        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
         setupView()
         initListeners()
+    }
+
+    private fun setupView() {
+        setupToolbar()
+        setupFranchises()
     }
 
     private fun setupToolbar() {
@@ -38,11 +44,6 @@ class CustomSearchActivity : AppCompatActivity(),
         setSupportActionBar(findViewById(R.id.toolbar))
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
-    }
-
-    private fun setupView() {
-        setupToolbar()
-        setupFranchises()
     }
 
     private fun setupFranchises() {
@@ -70,7 +71,7 @@ class CustomSearchActivity : AppCompatActivity(),
 
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         franchiseSelected = GrnenthalApplication.franquicias[position]
-        Toast.makeText(baseContext, "$franchiseSelected has been the franchise selected", Toast.LENGTH_SHORT).show()
+        Log.e(this.javaClass.name, "$franchiseSelected has been the franchise selected")
     }
 
     override fun onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean) {
@@ -79,7 +80,7 @@ class CustomSearchActivity : AppCompatActivity(),
             R.id.checkbox_business_pharmacy -> getChannelSelected2(isChecked)
             else -> 0
         }
-        Toast.makeText(baseContext, "Channel selected: $channelSelected", Toast.LENGTH_SHORT).show()
+        Log.e(this.javaClass.name, "Channel selected: $channelSelected")
     }
 
     private fun getChannelSelected1(isChecked: Boolean): Int {

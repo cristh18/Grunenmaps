@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:gravity="center"
-        android:text="GrunenMaps 2.0"
+        android:text="GrünenMaps 2.0"
         android:textColor="@android:color/white"
         android:textSize="24sp"
         android:textStyle="bold" />

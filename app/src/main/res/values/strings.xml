@@ -2,7 +2,8 @@
     <string name="app_name">GrunenMaps</string>
 
     <string name="copy_right_grunenthal">© Farmacias Autorizadas por el FNE. </string>
-    <string name="title_activity_main">Droguerías GRT</string>
+    <string name="title_activity_main">GrünenMaps</string>
+    <string name="subtitle_activity_main">Farmacias con Productos Grünenthal de Control Especial</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -32,6 +33,7 @@
     <string name="custom_search">Personalizar búsqueda</string>
     <string name="select_search_criteria">Selecciona tus criterios de búsqueda</string>
     <string name="pharmacy_chain">Cadena de drogería:</string>
+    <string name="pharmacy_type">Tipo de Droguería:</string>
     <string name="terms_and_conditions">Términos y condiciones</string>
     <string name="marker_format">%1$s\n%2$s\n%3$s</string>
 </resources>

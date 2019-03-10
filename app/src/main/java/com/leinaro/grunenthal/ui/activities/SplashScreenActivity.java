@@ -1,8 +1,7 @@
-package com.leinaro.grunenthal;
+package com.leinaro.grunenthal.ui.activities;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
@@ -15,6 +14,8 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.leinaro.grunenthal.GrnenthalApplication;
+import com.leinaro.grunenthal.R;
 import com.leinaro.grunenthal.api.client.ApiClientKt;
 import com.leinaro.grunenthal.api.models.Pharmacy;
 import com.leinaro.grunenthal.api.models.PharmarciesResponse;
@@ -23,9 +24,7 @@ import com.leinaro.grunenthal.api.services.PharmacyService;
 import com.leinaro.grunenthal.api.services.TermsService;
 
 import java.text.Collator;
-import java.text.ParseException;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -35,7 +34,6 @@ import io.reactivex.schedulers.Schedulers;
 
 public class SplashScreenActivity extends AppCompatActivity {
 
-    private boolean mVisible;
     private SharedPreferences sharedpreferences;
 
     private CompositeDisposable compositeDisposable = new CompositeDisposable();
@@ -47,7 +45,6 @@ public class SplashScreenActivity extends AppCompatActivity {
         hide();
         setContentView(R.layout.activity_splash_screen);
         getTerms();
-        mVisible = true;
     }
 
     private void getTerms() {
@@ -101,18 +98,13 @@ public class SplashScreenActivity extends AppCompatActivity {
         if (terminosYCondiciones) {
             requestAll();
         } else {
-            TextView textview = (TextView) view.findViewById(R.id.textmsg);
+            TextView textview = view.findViewById(R.id.textmsg);
             textview.setText(GrnenthalApplication.terms);
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
             alertDialog.setTitle(R.string.terms_title);
             alertDialog.setCancelable(false);
             alertDialog.setView(view);
-            alertDialog.setPositiveButton(getString(R.string.dialog_terms_ok), new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    aceptTerms();
-                }
-            });
+            alertDialog.setPositiveButton(getString(R.string.dialog_terms_ok), (dialog, which) -> aceptTerms());
 
             AlertDialog alert = alertDialog.create();
             alert.show();
@@ -188,16 +180,16 @@ public class SplashScreenActivity extends AppCompatActivity {
             GrnenthalApplication.franquicias.add(franquicia);
     }
 
-    private void sortFranquise() throws ParseException {
-        Collections.sort(GrnenthalApplication.franquicias, new Comparator<String>() {
-            @Override
-            public int compare(String o1, String o2) {
-                Collator usCollator = Collator.getInstance(Locale.US);
-                return usCollator.compare(o1, o2);
-//                return o1.compareToIgnoreCase(o2);
-            }
+    private void sortFranquise() {
+        Collections.sort(GrnenthalApplication.franquicias, (o1, o2) -> {
+            Collator usCollator = Collator.getInstance(Locale.US);
+            return usCollator.compare(o1, o2);
         });
-
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        compositeDisposable.clear();
+    }
 }
