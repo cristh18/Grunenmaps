@@ -287,16 +287,6 @@ public class MainActivity extends AppCompatActivity
                     }
                 }
             }
-        } else if (!filterf.isEmpty() && filterAll.isEmpty() && channel > 0) {
-            for (int i = 0; i < pharmacies.size(); i++) {
-                if (filterf.compareToIgnoreCase(pharmacies.get(i).getFranchise()) == 0) {
-                    if (channel == Integer.valueOf(pharmacies.get(i).getChannel())) {
-                        addMarkerFinal(pharmacies.get(i));
-                    }
-                } else if (filterf.equalsIgnoreCase("Todos") && channel == Integer.valueOf(pharmacies.get(i).getChannel())) {
-                    addMarkerFinal(pharmacies.get(i));
-                }
-            }
         }
     }
 
