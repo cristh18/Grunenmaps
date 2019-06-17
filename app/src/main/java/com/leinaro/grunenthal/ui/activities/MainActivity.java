@@ -9,17 +9,6 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.StringRes;
-import android.support.design.widget.NavigationView;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -27,6 +16,17 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -37,6 +37,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.material.navigation.NavigationView;
 import com.leinaro.grunenthal.GPSTracker;
 import com.leinaro.grunenthal.GrnenthalApplication;
 import com.leinaro.grunenthal.R;
@@ -285,16 +286,6 @@ public class MainActivity extends AppCompatActivity
                             || pharmacies.get(i).getAddress().toUpperCase().contains(filterAll.toUpperCase())) {
                         addMarkerFinal(pharmacies.get(i));
                     }
-                }
-            }
-        } else if (!filterf.isEmpty() && filterAll.isEmpty() && channel > 0) {
-            for (int i = 0; i < pharmacies.size(); i++) {
-                if (filterf.compareToIgnoreCase(pharmacies.get(i).getFranchise()) == 0) {
-                    if (channel == Integer.valueOf(pharmacies.get(i).getChannel())) {
-                        addMarkerFinal(pharmacies.get(i));
-                    }
-                } else if (filterf.equalsIgnoreCase("Todos") && channel == Integer.valueOf(pharmacies.get(i).getChannel())) {
-                    addMarkerFinal(pharmacies.get(i));
                 }
             }
         }

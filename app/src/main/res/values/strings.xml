@@ -36,4 +36,5 @@
     <string name="pharmacy_type">Tipo de Droguería:</string>
     <string name="terms_and_conditions">Términos y condiciones</string>
     <string name="marker_format">%1$s\n%2$s\n%3$s</string>
+    <string name="grunenthal_info"><b>Mayor información en el Departamento Médico de Grünenthal Colombiana S.A</b>\nCalle 93 # 16 - 20. Bogotá D.C. Teléfono: (1) 618 5550. Línea Gratuita Nacional: 01 80001111 04\nCorreo electrónico: dirmedica@grunenthal.com</string>
 </resources>

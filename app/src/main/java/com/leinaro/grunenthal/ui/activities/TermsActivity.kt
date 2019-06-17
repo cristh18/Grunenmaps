@@ -2,9 +2,9 @@ package com.leinaro.grunenthal.ui.activities
 
 import android.graphics.Color
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.view.MenuItem
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
 import com.leinaro.grunenthal.R
 import com.leinaro.grunenthal.api.client.getRemoteClient
 import com.leinaro.grunenthal.api.services.TermsService
