@@ -2,7 +2,8 @@
     <string name="app_name">GrunenMaps</string>
 
     <string name="copy_right_grunenthal">© Farmacias Autorizadas por el FNE. </string>
-    <string name="title_activity_main">Droguerías GRT</string>
+    <string name="title_activity_main">GrünenMaps</string>
+    <string name="subtitle_activity_main">Farmacias con Productos Grünenthal de Control Especial</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -29,4 +30,11 @@
     <string name="copy_error_getting_pharmacies">No se pudo obtener farmacias</string>
     <string name="copy_error_getting_terms">No se pudo obtener términos y condiciones</string>
     <string name="copy_permission_location_rationale">El permiso de ubicacion es necesario para mostrar la ubicacion de las farmacias</string>
+    <string name="custom_search">Personalizar búsqueda</string>
+    <string name="select_search_criteria">Selecciona tus criterios de búsqueda</string>
+    <string name="pharmacy_chain">Cadena de drogería:</string>
+    <string name="pharmacy_type">Tipo de Droguería:</string>
+    <string name="terms_and_conditions">Términos y condiciones</string>
+    <string name="marker_format">%1$s\n%2$s\n%3$s</string>
+    <string name="grunenthal_info"><b>Mayor información en el Departamento Médico de Grünenthal Colombiana S.A</b>\nCalle 93 # 16 - 20. Bogotá D.C. Teléfono: (1) 618 5550. Línea Gratuita Nacional: 01 80001111 04\nCorreo electrónico: dirmedica@grunenthal.com</string>
 </resources>
